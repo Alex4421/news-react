@@ -7,14 +7,19 @@ import Skeleton from "../../components/Skeleton/Skeleton";
 import Pagination from "../../components/Pagination/Pagination";
 import Categories from "../../components/Categories/Categories";
 import { getCategories } from "../../api/apiNews";
+import Search from "../../components/Search/Search";
+import { useDebounce } from "../../helpers/hooks/useDebounce";
 const Main = () => {
     const [news, setNews] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [categories, setCategories] = useState([]);
     const [selectedCategories, setSelectedCategories] = useState("All");
+    const [keywords, setKeywords] = useState("");
     const totalPages = 10;
     const pageSize = 10;
+
+    const debouncedKeywords=useDebounce(keywords, 1500)
 
     const fetchNews = async (currentPage) => {
             try {
@@ -22,7 +27,8 @@ const Main = () => {
                 const response = await getNews({
                     page_number: currentPage,
                     page_size: pageSize,
-                    category: selectedCategories === "All" ? null : selectedCategories
+                    category: selectedCategories === "All" ? null : selectedCategories,
+                    keywords: debouncedKeywords,
                 });
                 setNews(Array.isArray(response.news) ? response.news : []);
                 setIsLoading(false)
@@ -49,7 +55,7 @@ const Main = () => {
 
     useEffect(() => {
         fetchNews(currentPage)
-    }, [currentPage, selectedCategories])
+    }, [currentPage, selectedCategories, debouncedKeywords])
 
 
     const handleNextPage = () => {
@@ -72,7 +78,14 @@ const Main = () => {
 
     return (
         <main className={styles.main}>
-            <Categories categories={categories} setSelectedCategories={setSelectedCategories} selectedCategories={selectedCategories}/>
+            <Categories 
+                categories={categories} 
+                setSelectedCategories={setSelectedCategories} 
+                selectedCategories={selectedCategories}
+            />
+
+            <Search  keywords={keywords} setKeywords={setKeywords}/>
+
             {news.length > 0 && !isLoading ? (
                 <NewsBanner item={news[0]} />
             ) : (
@@ -81,7 +94,7 @@ const Main = () => {
 
             <Pagination  
                 handleNextPage={handleNextPage} 
-                handlePreviousPag={handlePreviousPage} 
+                handlePreviousPage={handlePreviousPage} 
                 handlePageClick={handlePageClick}
                 totalPages={totalPages}
                 currentPage={currentPage}
