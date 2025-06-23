@@ -1,6 +1,6 @@
 import formatTimeAgo from "../../helpers/formatTimeAgo";
 import styles from './styles.module.css';
-const NewsItem = ({item}) => {
+const NewsItem = ({ item }) => {
     return (
         <li className={styles.item}>
             <div className={styles.info}>
